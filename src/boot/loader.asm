@@ -97,7 +97,7 @@ error:
 ; 保护模式
 [bits 32]
 project_mode:
-    xchg bx, bx; 断点
+    ;chg bx, bx; 断点
     mov ax, data_selector
     mov ds, ax
     mov es, ax

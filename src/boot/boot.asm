@@ -24,7 +24,7 @@ call read_disk; 调用函数read_disk
 cmp word [0x1000], 0x55aa; 判断0x1000头两个字节是否为55aa
 jnz error; 不是就跳转到error
 jmp 0:0x1002; 是就跳转到1002位置继续运行
-; 阻塞，$表示当前这一行
+; 阻塞，$表示当前这一行，如果运行正常的话，是不会执行到这个指令的
 jmp $
 
 read_disk:
