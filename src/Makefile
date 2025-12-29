@@ -60,4 +60,8 @@ clean:
 
 .PHONY: bochs
 bochs: $(BUILD)/master.img
-	bochs -q
+	bochs -q -f ../bochs/bochsrc
+
+.PHONY: bochs-gdb
+bochs-gdb: $(BUILD)/master.img
+	bochs-gdb -q -f ../bochs/bochsrc.gdb
