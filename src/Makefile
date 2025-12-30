@@ -65,3 +65,24 @@ bochs: $(BUILD)/master.img
 .PHONY: bochs-gdb
 bochs-gdb: $(BUILD)/master.img
 	bochs-gdb -q -f ../bochs/bochsrc.gdb
+
+.PHONY: qemu
+qemu: $(BUILD)/master.img
+	qemu-system-i386 \
+	-m 32M \
+	-boot c \
+	-hda $<
+
+.PHONY: qemu-gdb
+qemu-gdb: $(BUILD)/master.img
+	qemu-system-i386 \
+	-m 32M \
+	-boot c \
+	-hda $< \
+	-s -S
+
+# 将master.img生成为vmware可以运行的格式
+$(BUILD)/master.vmdk: $(BUILD)/master.img
+	qemu-img convert -O vmdk $< $@
+.PHONY: vmdk
+vmdk: $(BUILD)/master.vmdk
