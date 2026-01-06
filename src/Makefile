@@ -29,9 +29,11 @@ $(BUILD)/kernel/%.o: $(SRC)/kernel/%.c
 	gcc $(CFLAGS) $(DEBUG) $(INCLUDE) -c $< -o $@
 
 # 将kernel生成的elf文件连接到内核
-$(BUILD)/kernel.bin: $(BUILD)/kernel/start.o \
-	$(BUILD)/kernel/main.o
-
+$(BUILD)/kernel.bin: \
+	$(BUILD)/kernel/start.o \
+	$(BUILD)/kernel/main.o \
+	$(BUILD)/kernel/io.o
+	
 	$(shell mkdir -p $(dir $@))
 	ld -m elf_i386 -static $^ -o $@ -Ttext $(ENTRYPOINT)
 # elf从磁盘进入内存的特殊处理，可以读取的更快
