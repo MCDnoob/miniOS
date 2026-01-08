@@ -1,6 +1,7 @@
 #include <mkuos/mkuos.h>
 #include <mkuos/types.h>
 #include <mkuos/io.h>
+#include <mkuos/string.h>
 /*输入输出*/
 /*- CRT 地址寄存器 0x3D4
 - CRT 数据寄存器 0x3D5
@@ -13,6 +14,9 @@
 #define CRT_CURSOR_H 0xe
 #define CRT_CURSOR_L 0xf
 
+char message[] = "hello mkuos!!!";
+char buf[1024];
+
 void kernel_init() 
 {
   outb(CRT_ADDR_REG, CRT_CURSOR_H);
@@ -24,5 +28,25 @@ void kernel_init()
   outb(CRT_DATA_REG, 0);
   outb(CRT_ADDR_REG, CRT_CURSOR_L);
   outb(CRT_DATA_REG, 123);
+
+  int res;
+  res = strcmp(buf, message);
+  strcpy(buf, message);
+  res = strcmp(buf, message);
+  strcat(buf, message);
+  res = strcmp(buf, message);
+  
+  res = strlen(message);
+  res = sizeof(message);
+
+  char *ptr = strchr(message, '!');
+  ptr = strrchr(message, '!');
+
+  memset(buf, 0, sizeof(buf));
+  
+  res = memcmp(buf, message, sizeof(message));
+  memcpy(buf, message, sizeof(message));
+  res = memcmp(buf, message, sizeof(message));
+  ptr = memchr(buf, '!', sizeof(message));
   return;
 }
