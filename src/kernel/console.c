@@ -29,7 +29,7 @@
 #define ASCII_CR 0x0D // \r
 #define ASCII_DEL 0x7F
 
-// 屏幕内存一共4000字节，是由显卡映射的，最小就是0xB8000
+// 屏幕内存一共4000字节，是由显卡映射的，最小的位置是0xB8000
 static u32 screen; // 当前屏幕开始的内存位置，低于此内存位置的内容不在屏幕上显示，仅在当前开始位置向下显示4000字节
 static u32 pos;    // 当前光标内存位置
 static u32 x, y;   // 当前光标的坐标(WIDTH, HEIGHT)(0~80, 0~25)
@@ -136,8 +136,8 @@ static void scroll_up()
     }
     else
     {
-        memcpy(MEM_BASE, screen, SRC_SIZE); // 当前屏幕的内容拷贝到MEM_BASE
-        pos -= (screen - MEM_BASE);         // 光标位置回到从MEM_BASE出发屏幕内存的底部
+        memcpy((void *)MEM_BASE, (void *)screen, SRC_SIZE); // 当前屏幕的内容拷贝到MEM_BASE
+        pos -= (screen - MEM_BASE);                         // 光标位置回到从MEM_BASE出发屏幕内存的底部
         screen = MEM_BASE;
     }
     set_screen();
@@ -168,7 +168,7 @@ void console_clear()
 
     // MEM_BASE->MEM_END字符全都设置为空格
     u16 *ptr = (u16 *)MEM_BASE;
-    while (ptr < MEM_END)
+    while (ptr < (u16 *)MEM_END)
     {
         *ptr = erase;
         ptr++;
