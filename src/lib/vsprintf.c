@@ -1,6 +1,7 @@
 #include <mkuos/stdarg.h>
 #include <mkuos/string.h>
 #include <mkuos/stdio.h>
+#include <mkuos/assert.h>
 
 #define ZEROPAD 0x01 // 填充0
 #define SIGN 0x02    // unsigned/signed long
@@ -430,6 +431,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
     *str = '\0';
     // 返回转换好的字符串长度
     i = str - buf;
+    assert(i < 1024);
     return i;
 }
 
