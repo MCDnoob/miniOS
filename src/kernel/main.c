@@ -5,6 +5,7 @@
 #include <mkuos/console.h>
 #include <mkuos/stdarg.h>
 #include <mkuos/printk.h>
+#include <mkuos/assert.h>
 
 /*void test_args(int cnt, ...)
 {
@@ -23,10 +24,8 @@ void kernel_init()
 {
   console_init();
   // test_args(5, 1, 0xaa, 0x36, 7, 10);
-  int cnt = 30;
-  while (cnt--)
-  {
-    printk("hello, mkuos %#010x\n", cnt);
-  }
+  assert(3 < 5);
+  // assert(3 > 5);
+  panic("Out of Memory");
   return;
 }
