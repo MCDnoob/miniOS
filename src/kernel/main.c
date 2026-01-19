@@ -7,26 +7,11 @@
 #include <mkuos/printk.h>
 #include <mkuos/assert.h>
 #include <mkuos/debug.h>
-
-/*void test_args(int cnt, ...)
-{
-  va_list args;
-  va_start(args, cnt);
-
-  int arg;
-  while (cnt--)
-  {
-    arg = va_arg(args, int);
-  }
-  va_end(args);
-}*/
+#include <mkuos/global.h>
 
 void kernel_init()
 {
   console_init();
-  // test_args(5, 1, 0xaa, 0x36, 7, 10);
-  BMB;
-
-  DEBUGK("debug mkuos!\n");
+  gdt_init();
   return;
 }
