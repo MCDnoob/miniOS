@@ -8,10 +8,12 @@
 #include <mkuos/assert.h>
 #include <mkuos/debug.h>
 #include <mkuos/global.h>
+#include <mkuos/task.h>
 
 void kernel_init()
 {
   console_init();
   gdt_init();
+  task_init();
   return;
 }

@@ -214,6 +214,7 @@ void console_write(char *buf, u32 count)
         default:
             if (x >= WIDTH)
             {
+                command_lf();
                 x -= WIDTH;
                 pos -= ROW_SIZE;
             }
