@@ -4,13 +4,14 @@
 extern handler_table; 一个数组，存储所有中断处理函数,在interrupt.c中
 
 section .text
-
-%macro INTERRUPT_HANDLER 2
-interrupt_handler_%1
-%ifn %2
+; NASM宏
+%macro INTERRUPT_HANDLER 2; 宏名 INTERRUPT_HANDLER 参数个数 2个
+; 宏体，直到%endmacro都是宏
+interrupt_handler_%1 ; 定义中断转入入口函数名 %1 替换为第一个参数，为中断向量号
+%ifn %2 ; 若第二个参数为0
     push 0x20222202
 %endif
-    push %1; 压入中断向量，跳转到中断入口
+    push %1; 压入中断向量错误码，跳转到中断入口
     jmp interrupt_entry
 %endmacro
 
@@ -63,6 +64,23 @@ INTERRUPT_HANDLER 0x1d, 0; reserved
 INTERRUPT_HANDLER 0x1e, 0; reserved
 INTERRUPT_HANDLER 0x1f, 0; reserved
 
+INTERRUPT_HANDLER 0x20, 0; clock 时钟中断
+INTERRUPT_HANDLER 0x21, 0
+INTERRUPT_HANDLER 0x22, 0
+INTERRUPT_HANDLER 0x23, 0
+INTERRUPT_HANDLER 0x24, 0
+INTERRUPT_HANDLER 0x25, 0
+INTERRUPT_HANDLER 0x26, 0
+INTERRUPT_HANDLER 0x27, 0
+INTERRUPT_HANDLER 0x28, 0
+INTERRUPT_HANDLER 0x29, 0
+INTERRUPT_HANDLER 0x2a, 0
+INTERRUPT_HANDLER 0x2b, 0
+INTERRUPT_HANDLER 0x2c, 0
+INTERRUPT_HANDLER 0x2d, 0
+INTERRUPT_HANDLER 0x2e, 0
+INTERRUPT_HANDLER 0x2f, 0
+
 ; 下面数组记录了每个中断入口函数的指针
 section .data
 global handler_entry_table
@@ -99,3 +117,19 @@ handler_entry_table:
     dd interrupt_handler_0x1d
     dd interrupt_handler_0x1e
     dd interrupt_handler_0x1f
+    dd interrupt_handler_0x20
+    dd interrupt_handler_0x21
+    dd interrupt_handler_0x22
+    dd interrupt_handler_0x23
+    dd interrupt_handler_0x24
+    dd interrupt_handler_0x25
+    dd interrupt_handler_0x26
+    dd interrupt_handler_0x27
+    dd interrupt_handler_0x28
+    dd interrupt_handler_0x29
+    dd interrupt_handler_0x2a
+    dd interrupt_handler_0x2b
+    dd interrupt_handler_0x2c
+    dd interrupt_handler_0x2d
+    dd interrupt_handler_0x2e
+    dd interrupt_handler_0x2f
