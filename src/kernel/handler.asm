@@ -8,7 +8,7 @@ section .text
 %macro INTERRUPT_HANDLER 2; 宏名 INTERRUPT_HANDLER 参数个数 2个
 ; 宏体，直到%endmacro都是宏
 interrupt_handler_%1 ; 定义中断转入入口函数名 %1 替换为第一个参数，为中断向量号
-%ifn %2 ; 若第二个参数为0
+%ifn %2 ; 若第二个参数为0，手动压入错误码，否则，又硬件压入错误码
     push 0x20222202
 %endif
     push %1; 压入中断向量错误码，跳转到中断入口
@@ -17,10 +17,40 @@ interrupt_handler_%1 ; 定义中断转入入口函数名 %1 替换为第一个�
 
 interrupt_entry:
     
-    mov eax, [esp]
-    ;调用中孤单处理函数 handler_table 中存储了中断处理函数的指针
-    call [handler_table + eax * 4]
+    ;mov eax, [esp]
+    ;调用中断处理函数 handler_table 中存储了中断处理函数的指针
+    ;call [handler_table + eax * 4]; 
     ; 对应push %1 调用结束后恢复栈，相当于弹出 pop %1
+    ;add esp, 8
+    ;iret
+
+    ;保存上下文寄存器信息，四个段寄存器
+    push ds
+    push es
+    push fs
+    push gs
+    pusha; 保存所有8个通用寄存器
+
+    ; 找到前面 push %1 压入的中断向量的编号 12*4：12个寄存器，每个栈帧4字节
+    mov eax, [esp + 12 * 4]
+
+    ; 再次压入中断向量的编号，用于中断函数的第一个参数vector
+    push eax
+
+    ; 调用对应的中断处理函数 handler_table 中存储了中断函数的指针
+    call [handler_table + eax * 4]
+
+    ; 对应 push eax 调用结束恢复栈
+    add esp, 4
+
+    ; 恢复下文寄存器信息
+    popa
+    pop gs
+    pop fs
+    pop es
+    pop ds
+
+    ; 对应 push %1 error code 或 push magic
     add esp, 8
     iret
 

@@ -60,15 +60,24 @@ void send_eoi(int vector)
     }
 }
 
-u32 counter = 0;
+// u32 counter = 0;
+extern void schedule();
 
 void default_handler(int vector)
 {
     send_eoi(vector);
-    LOGK("[%d] default interrupt called %d...\n", vector, counter++);
+    schedule();
+    // LOGK("[%d] default interrupt called %d...\n", vector, counter++);
 }
 
-void exception_handler(int vector)
+// 具体的中断处理函数，将栈中保存的上下文寄存器全都认为是参数传入函数
+// 注意参数的顺序，其实就是栈从右向左压入参数的顺序，这个其实就是说明函数执行——
+// 有参数列表——从栈中从左向右获取参数
+void exception_handler(int vector,
+                       u32 edi, u32 esi, u32 ebp, u32 esp,
+                       u32 ebx, u32 edx, u32 ecx, u32 eax,
+                       u32 gs, u32 fs, u32 es, u32 ds,
+                       u32 vector0, u32 error, u32 eip, u32 cs, u32 eflags)
 {
     char *message = NULL;
     if (vector < 22)
@@ -80,7 +89,13 @@ void exception_handler(int vector)
         message = messages[15];
     }
 
-    printk("Exception : [0x%02x] %s \n", vector, message);
+    printk("\nException : %s \n", messages[vector]);
+    printk("   VECTOR : 0x%02X\n", vector);
+    printk("    ERROR : 0x%08X\n", error);
+    printk("    FLAGS : 0x%08X\n", eflags);
+    printk("       CS : 0x%02X\n", cs);
+    printk("      EIP : 0x%08X\n", eip);
+    printk("      ESP : 0x%08X\n", esp);
     // 阻塞
     hang();
 }

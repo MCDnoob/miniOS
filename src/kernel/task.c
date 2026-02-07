@@ -1,6 +1,7 @@
 #include <mkuos/task.h>
 #include <mkuos/printk.h>
 #include <mkuos/debug.h>
+#include <mkuos/types.h>
 
 #define PAGE_SIZE 0x1000 // 一页内存 4k
 
@@ -23,22 +24,23 @@ void schedule()
     task_t *next = current == a ? b : a;
     task_switch(next);
 }
-
-u32 thread_a()
+// 省略栈帧
+u32 _ofp thread_a()
 {
+    // 为什么要打开中断？因为外中断处理过程中，中断是默认关闭的
+    __asm__ volatile("sti\n"); // 打开中断
     while (true)
     {
         printk("A");
-        schedule();
     }
 }
-
-u32 thread_b()
+// 省略栈帧
+u32 _ofp thread_b()
 {
+    __asm__ volatile("sti\n"); // 打开中断
     while (true)
     {
         printk("B");
-        schedule();
     }
 }
 

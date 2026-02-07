@@ -9,7 +9,7 @@ task_switch:
     push esi
     push edi
 
-    ; 找到当前人物的tcb基址，并保存当前栈顶指针到tcb
+    ; 找到当前任务的tcb基址，并保存当前栈顶指针到tcb
     mov eax, esp       ; esp->eax
     and eax, 0xfffff000; 任务栈基址
     mov [eax], esp     ; 当前esp栈顶保存到当前TCB中([eax] = TCB基址的内容)

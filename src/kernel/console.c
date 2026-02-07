@@ -20,13 +20,13 @@
 
 #define ASCII_NUL 0x00
 #define ASCII_ENQ 0x05
-#define ASCII_BEL 0x07
-#define ASCII_BS 0x08 // \a
-#define ASCII_HT 0x09 // \b
-#define ASCII_LF 0x0A // \n
-#define ASCII_VT 0x0B // \v
-#define ASCII_FF 0x0C // \f
-#define ASCII_CR 0x0D // \r
+#define ASCII_BEL 0x07 // \a
+#define ASCII_BS 0x08  // \b
+#define ASCII_HT 0x09  // \t
+#define ASCII_LF 0x0A  // \n
+#define ASCII_VT 0x0B  // \v
+#define ASCII_FF 0x0C  // \f
+#define ASCII_CR 0x0D  // \r
 #define ASCII_DEL 0x7F
 
 // 屏幕内存一共4000字节，是由显卡映射的，最小的位置是0xB8000
@@ -40,33 +40,33 @@ static u16 erase = 0x0720; // 07：样式，0x20：空格，CPU小端存储，0x
 // 从硬件中获得当前显示器的开始位置
 static void get_screen()
 {
-    outb(CRT_ADDR_REG, CRT_START_ADDR_H);
-    screen = inb(CRT_DATA_REG) << 8;
-    outb(CRT_ADDR_REG, CRT_START_ADDR_L);
-    screen |= inb(CRT_DATA_REG);
+    outb(CRT_ADDR_REG, CRT_START_ADDR_H); // 开始位置高地址
+    screen = inb(CRT_DATA_REG) << 8;      // 开始位置高八位
+    outb(CRT_ADDR_REG, CRT_START_ADDR_L); // 开始位置低地址
+    screen |= inb(CRT_DATA_REG);          // 开始位置低八位
 
     screen <<= 1;       // scrren*2, 每个字符都是两字节
     screen += MEM_BASE; // 加上基地址
 }
 
-// 设置屏幕内存位置
+// 设置屏幕内存开始的位置
 static void set_screen()
 {
     // 正确写法：16位的字符序号，高8位右移8位，低8位直接取
-    u16 screen_off = (screen - MEM_BASE) >> 1;
+    // u16 screen_off = (screen - MEM_BASE) >> 1;
     outb(CRT_ADDR_REG, CRT_START_ADDR_H);
-    // outb(CRT_DATA_REG, ((screen - MEM_BASE) >> 9) & 0xff);
-    outb(CRT_DATA_REG, screen_off >> 8); // 高位
+    outb(CRT_DATA_REG, ((screen - MEM_BASE) >> 9) & 0xff);
+    // outb(CRT_DATA_REG, screen_off >> 8); // 高位
     outb(CRT_ADDR_REG, CRT_START_ADDR_L);
-    // outb(CRT_DATA_REG, ((screen - MEM_BASE) >> 1) & 0xff);
-    outb(CRT_DATA_REG, screen_off & 0xFF); // 低位
+    outb(CRT_DATA_REG, ((screen - MEM_BASE) >> 1) & 0xff);
+    // outb(CRT_DATA_REG, screen_off & 0xFF); // 低位
 }
 
 // 获得当前光标内存位置
 static void get_cursor()
 {
-    outb(CRT_ADDR_REG, CRT_CURSOR_H);
-    pos = inb(CRT_DATA_REG) << 8;
+    outb(CRT_ADDR_REG, CRT_CURSOR_H); // 高地址
+    pos = inb(CRT_DATA_REG) << 8;     // 高八位
     outb(CRT_ADDR_REG, CRT_CURSOR_L);
     pos |= inb(CRT_DATA_REG);
 
@@ -83,14 +83,31 @@ static void get_cursor()
 // 设置光标内存位置
 static void set_cursor()
 {
-    u16 cursor_off = (pos - MEM_BASE) >> 1;
+    // u16 cursor_off = (pos - MEM_BASE) >> 1;
 
     outb(CRT_ADDR_REG, CRT_CURSOR_H);
-    // outb(CRT_DATA_REG, ((pos - MEM_BASE) >> 9) & 0xff);
-    outb(CRT_DATA_REG, cursor_off >> 8); // 光标地址高位
+    outb(CRT_DATA_REG, ((pos - MEM_BASE) >> 9) & 0xff);
+    // outb(CRT_DATA_REG, cursor_off >> 8); // 光标地址高位
     outb(CRT_ADDR_REG, CRT_CURSOR_L);
-    // outb(CRT_DATA_REG, ((pos - MEM_BASE) >> 1) & 0xff);
-    outb(CRT_DATA_REG, cursor_off & 0xFF); // 光标地址低位
+    outb(CRT_DATA_REG, ((pos - MEM_BASE) >> 1) & 0xff);
+    // outb(CRT_DATA_REG, cursor_off & 0xFF); // 光标地址低位
+}
+
+void console_clear()
+{
+    screen = MEM_BASE;
+    pos = MEM_BASE;
+    x = 0, y = 0;
+    set_screen();
+    set_cursor();
+
+    // MEM_BASE->MEM_END字符全都设置为空格
+    u16 *ptr = (u16 *)MEM_BASE;
+    while (ptr < (u16 *)MEM_END)
+    {
+        *ptr = erase;
+        ptr++;
+    }
 }
 
 // 处理输入的ASCII-退格
@@ -107,10 +124,8 @@ static void command_bs()
 // 处理输入的ASCII-删除当前字符
 static void command_del()
 {
-    if (x)
-    {
-        *(u16 *)pos = erase;
-    }
+
+    *(u16 *)pos = erase;
 }
 
 // 处理输入的ASCII-光标回到行的开头
@@ -152,27 +167,7 @@ static void command_lf()
         pos += ROW_SIZE;
         return;
     }
-    else
-    {
-        scroll_up();
-    }
-}
-
-void console_clear()
-{
-    screen = MEM_BASE;
-    pos = MEM_BASE;
-    x = 0, y = 0;
-    set_screen();
-    set_cursor();
-
-    // MEM_BASE->MEM_END字符全都设置为空格
-    u16 *ptr = (u16 *)MEM_BASE;
-    while (ptr < (u16 *)MEM_END)
-    {
-        *ptr = erase;
-        ptr++;
-    }
+    scroll_up();
 }
 
 void console_write(char *buf, u32 count)
@@ -214,9 +209,9 @@ void console_write(char *buf, u32 count)
         default:
             if (x >= WIDTH)
             {
-                command_lf();
                 x -= WIDTH;
                 pos -= ROW_SIZE;
+                command_lf();
             }
 
             *((char *)pos) = ch;

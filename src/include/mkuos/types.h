@@ -1,17 +1,20 @@
 #ifndef MKUOS_TYPES_H
 #define MKUOS_TYPES_H
 
-#define EOF -1  // END OF FILE
+#define EOF -1 // END OF FILE
 
-#define NULL ((void *)0)  // 空指针
+#define NULL ((void *)0) // 空指针
 
-#define EOS '\0'    // 字符串结束符
+#define EOS '\0' // 字符串结束符
 
 #define bool _Bool
 #define true 1
 #define false 0
 
-#define _packed __attribute__((packed)) // 结构体紧凑排列
+// 结构体紧凑排列
+#define _packed __attribute__((packed))
+// 省略栈帧
+#define _ofp __attribute__((optimize("omit-frame-pointer")))
 
 typedef unsigned int size_t;
 
